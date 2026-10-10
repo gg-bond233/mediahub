@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mediahub.mapper.CollectibleMapper">
+
+    <!--根据媒体 ID 查询该媒体下的有效藏品，并带出秒杀库存和时间。-->
+    <!--接口方法接收一个 Long 类型的 mediaId。-->
+    <select id="queryCollectibleOfMedia" resultType="com.mediahub.entity.Collectible" parameterType="java.lang.Long">
+        SELECT
+            v.`id`, v.`media_id`, v.`title`, v.`sub_title`, v.`rules`, v.`pay_value`,
+            v.`actual_value`, v.`type`, sv.`stock` , sv.begin_time , sv.end_time
+        FROM tb_collectible v
+        LEFT JOIN  tb_seckill_collectible sv ON v.id = sv.collectible_id
+        WHERE v.media_id = #{mediaId} AND v.status = 1
+    </select>
+
+    <!--id="queryAllSeckillCollectibles" 必须和 Java Mapper 接口中的方法名一致。
+resultType="com.mediahub.entity.Collectible" 表示每一行结果映射成一个 Collectible 实体对象。-->
+    <!--LEFT JOIN 即使某个藏品没有秒杀记录，也会查出来，只是 stock、begin_time、end_time 为 NULL。-->
+    <!--即使某个藏品没有对应媒体，也会查出来，只是 media_name 为 NULL。-->
+    <select id="queryAllSeckillCollectibles" resultType="com.mediahub.entity.Collectible">
+        SELECT
+            v.`id`, v.`media_id`, v.`title`, v.`sub_title`, v.`rules`, v.`pay_value`,
+            v.`actual_value`, v.`type`, sv.`stock`, sv.begin_time, sv.end_time,
+            m.`name` AS media_name
+        FROM tb_collectible v
+        LEFT JOIN tb_seckill_collectible sv ON v.id = sv.collectible_id
+        LEFT JOIN tb_media m ON v.media_id = m.id
+        WHERE v.type = 1 AND v.status = 1
+        ORDER BY sv.begin_time DESC
+    </select>
+</mapper>

@@ -1,0 +1,43 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: mediahub
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/mediahub?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+    username: ${MYSQL_USER:mediahub}
+    password: ${MYSQL_PASSWORD:123456}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 10
+          min-idle: 1
+          time-between-eviction-runs: 10s
+  jackson:
+    default-property-inclusion: non_null
+  servlet:
+    multipart:
+      max-file-size: 5MB
+
+mybatis-plus:
+  type-aliases-package: com.mediahub.entity
+
+app:
+  # 长评图片上传目录（本地 Windows 部署默认存到 E 盘独立目录，避免 mvn clean 误删；
+  # Docker / 服务器部署通过 UPLOAD_DIR 环境变量覆盖，如 /app/upload）
+  upload-dir: ${UPLOAD_DIR:E:/save-img/mediahub-upload}
+  # 开发模式：发送验证码时直接返回验证码（未接入真实短信通道）
+  dev-return-code: ${DEV_RETURN_CODE:true}
+
+logging:
+  level:
+    com.mediahub: debug
+  pattern:
+    dateformat: mm:ss.SSS
